@@ -35,7 +35,6 @@ import { Transaction } from '../../../types'
 interface Props {
   isOpen: boolean
   onClose: () => void
-  // eslint-disable-next-line no-unused-vars
   onSuccess: (transaction: Transaction) => void
 }
 

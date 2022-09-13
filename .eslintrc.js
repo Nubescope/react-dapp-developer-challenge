@@ -1,7 +1,8 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   extends: ['prettier', 'next/core-web-vitals'],
-  plugins: ['prettier', 'import', 'simple-import-sort', 'chakra-ui'],
+  plugins: ['prettier', 'import', 'simple-import-sort', 'chakra-ui', '@typescript-eslint'],
+  root: true,
   rules: {
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
@@ -28,8 +29,10 @@ module.exports = {
     'no-use-before-define': 'warn',
     'spaced-comment': 'warn',
     'no-unused-expressions': ['error'],
-    'no-unused-vars': 'error',
     'no-use-before-define': 'off',
+
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error',
 
     'jsx-quotes': ['error', 'prefer-double'],
     'react/jsx-no-literals': ['off', { noStrings: true }],
