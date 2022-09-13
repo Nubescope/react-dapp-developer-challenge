@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { BigNumber } from 'ethers'
-import { useAccount } from 'wagmi'
+import { useAccount, useQuery } from 'wagmi'
 
 import { CDAI } from '../constants'
 import useDaiContract from './useDaiContract'
