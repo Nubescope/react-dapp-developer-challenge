@@ -10,23 +10,26 @@ import Connect from '../../components/Connect'
 import Nav from '../../components/Nav'
 import useCdaiSupplyApy from '../../hooks/useCdaiApy'
 import { useIsMounted } from '../../hooks/useIsMounted'
+import useIsValidNetwork from '../../hooks/useIsValidNetwork'
+import InvalidNetworkMessage from './components/InvalidNetworkMessage'
 
 /**
  * Home
  */
 
 const Home: NextPage = () => {
-  const { isConnected } = useAccount()
   const router = useRouter()
+  const isMounted = useIsMounted()
+  const { isConnected } = useAccount()
+  const isValidNetwork = useIsValidNetwork()
   const { data: apy } = useCdaiSupplyApy()
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && isValidNetwork) {
       router.push('/dashboard')
     }
-  }, [isConnected, router])
+  }, [isConnected, isValidNetwork, router])
 
-  const isMounted = useIsMounted()
   if (!isMounted) {
     return null
   }
@@ -41,6 +44,7 @@ const Home: NextPage = () => {
       <Nav hideConnectButton />
 
       <Container maxW="2xl" py="10" role="main">
+        {isConnected && !isValidNetwork && <InvalidNetworkMessage />}
         <Flex align="center" direction="column" px={6} py={10} textAlign="center">
           <Flex align="center" justify="space-around">
             <Avatar mr="5" name="Compound logo" src="/compound.svg" />
@@ -52,18 +56,22 @@ const Home: NextPage = () => {
           </Heading>
           <Text color="gray.500">
             Use Compound&apos;s CDAI platform to invest your DAI and earn up to&nbsp;
-            <Text fontWeight="bold">{apy ? formatApy(apy) : '0.21'}% APY</Text>
+            <Text as="span" fontWeight="bold">
+              {apy ? formatApy(apy) : '0.21'}% APY
+            </Text>
           </Text>
 
-          <Divider mt="4" />
-
-          <Heading as="h2" mt="5" fontWeight="medium" size="md">
-            Connect with
-          </Heading>
-
-          <Flex justify="center" mt="5">
-            <Connect />
-          </Flex>
+          {(!isConnected || (isConnected && isValidNetwork)) && (
+            <>
+              <Divider mt="4" />
+              <Heading as="h2" mt="5" fontWeight="medium" size="md">
+                Connect with
+              </Heading>
+              <Flex justify="center" mt="5">
+                <Connect />
+              </Flex>
+            </>
+          )}
         </Flex>
       </Container>
     </div>

@@ -6,15 +6,14 @@ import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { publicProvider } from 'wagmi/providers/public'
 
+import { IS_TEST } from '../constants'
 import { mockConnector } from '../helpers/test-helpers/utils'
 
 /**
  * Constants
  */
 
-const isTest = process.env.NEXT_PUBLIC_TEST_MODE === 'true'
-
-const { chains, provider, webSocketProvider } = isTest
+const { chains, provider, webSocketProvider } = IS_TEST
   ? configureChains(
       [chain.hardhat],
       [
@@ -37,7 +36,7 @@ const { chains, provider, webSocketProvider } = isTest
       ]
     )
 
-const connectors = isTest
+const connectors = IS_TEST
   ? [mockConnector]
   : [
       new MetaMaskConnector({

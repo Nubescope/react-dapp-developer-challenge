@@ -8,7 +8,8 @@
     "start": "next start",
     "test": "jest",
     "lint": "next lint",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npx playwright test",
+    "deploy": "npx netlify deploy --build --prod"
   },
   "dependencies": {
     "@apollo/client": "3.6.9",
