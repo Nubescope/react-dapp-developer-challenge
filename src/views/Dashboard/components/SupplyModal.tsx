@@ -4,6 +4,8 @@ import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormErrorMessage,
   Input,
   InputGroup,
   InputLeftElement,
@@ -18,8 +20,9 @@ import {
   Text,
   Tooltip,
 } from '@chakra-ui/react'
+import { BigNumber } from 'ethers'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import { isEmpty } from 'lodash'
+import _, { isEmpty } from 'lodash'
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount, useWaitForTransaction } from 'wagmi'
 
@@ -27,6 +30,12 @@ import useCdaiMint from '../../../hooks/useCdaiMint'
 import useDaiBalance from '../../../hooks/useDaiBalance'
 import formatBigNumber from '../../../lib/formatters/formatBigNumber'
 import { Transaction } from '../../../types'
+
+/**
+ * Constants
+ */
+
+const MAX_DECIMALS = 10
 
 /**
  * Types
@@ -108,7 +117,7 @@ const DepositModal: React.FC<Props> = ({ onSuccess, onClose, isOpen }) => {
   }
 
   const isRunning = isMintRunning || isTransactionRunning
-  const isValidAmount = balance ? parseFloat(formatUnits(balance)) >= parseFloat(amount) : false
+  const isValidAmount = checkIsValidAmount(balance, amount)
   const hasAmount = !isEmpty(amount)
 
   return (
@@ -124,26 +133,33 @@ const DepositModal: React.FC<Props> = ({ onSuccess, onClose, isOpen }) => {
         <ModalCloseButton />
         <form>
           <ModalBody>
-            <InputGroup>
-              <InputLeftElement color="gray.300" fontSize="1.2em" pointerEvents="none">
-                $
-              </InputLeftElement>
-              <Input
-                ref={inputRef}
-                autoFocus
-                disabled={isRunning || isTransactionSuccess}
-                errorBorderColor="red.300"
-                isInvalid={hasAmount && !isValidAmount}
-                maxLength={4}
-                onChange={handleAmountChange}
-                placeholder="Enter amount"
-                type="number"
-              />
-              <InputRightElement>
-                {hasAmount && isValidAmount && <CheckIcon color="green.500" />}
-                {hasAmount && !isValidAmount && <NotAllowedIcon color="red.300" />}
-              </InputRightElement>
-            </InputGroup>
+            <FormControl isInvalid={hasAmount && !isValidAmount}>
+              <InputGroup>
+                <InputLeftElement color="gray.300" fontSize="1.2em" pointerEvents="none">
+                  $
+                </InputLeftElement>
+                <Input
+                  ref={inputRef}
+                  autoFocus
+                  disabled={isRunning || isTransactionSuccess}
+                  errorBorderColor="red.300"
+                  isInvalid={hasAmount && !isValidAmount}
+                  maxLength={4}
+                  onChange={handleAmountChange}
+                  placeholder="Enter amount"
+                  type="number"
+                />
+                <InputRightElement>
+                  {hasAmount && isValidAmount && <CheckIcon color="green.500" />}
+                  {hasAmount && !isValidAmount && <NotAllowedIcon color="red.300" />}
+                </InputRightElement>
+              </InputGroup>
+              {!isValidAmount && (
+                <FormErrorMessage>
+                  {hasTooManyDecimals(amount) ? 'Too many decimals' : 'Amount is greater than DAI balance'}
+                </FormErrorMessage>
+              )}
+            </FormControl>
           </ModalBody>
 
           <ModalFooter justifyContent="space-between" flexDir={['column', 'row']} display="flex">
@@ -178,6 +194,26 @@ const DepositModal: React.FC<Props> = ({ onSuccess, onClose, isOpen }) => {
       </ModalContent>
     </Modal>
   )
+}
+
+/**
+ * Helpers
+ */
+
+const hasTooManyDecimals = (amount: string) => {
+  const parts = _.split(amount, /\,|\./)
+
+  if (parts.length !== 2) {
+    return false
+  }
+
+  return parts[1].length > MAX_DECIMALS
+}
+
+const checkIsValidAmount = (balance: BigNumber, amount: string) => {
+  const valid = balance ? parseFloat(formatUnits(balance)) >= parseFloat(amount) : false
+
+  return valid && !hasTooManyDecimals(amount)
 }
 
 /**
